@@ -125,7 +125,6 @@ class AscendAttentionState(Enum):
     DecodeOnly = 2
     ChunkedPrefill = 3
     SpecDecoding = 4
-    EncoderOnly = 5
 
 
 @dataclass
@@ -293,27 +292,6 @@ class AscendAttentionBackendImpl(AttentionImpl):
         self.key_cache = None
         self.value_cache = None
         self.torch_npu_check = version_check()
-
-    def _forward_encoder(
-        self,
-        query: torch.Tensor,
-        key: torch.Tensor,
-        value: torch.Tensor,
-        attn_metadata: AscendMetadata,
-        output: Optional[torch.Tensor] = None,
-        num_tokens=0,
-    ) -> torch.Tensor:
-        torch_npu._npu_flash_attention(query=query,
-                                       key=key,
-                                       value=value,
-                                       mask=attn_metadata.attn_mask,
-                                       seq_len=attn_metadata.seq_lens,
-                                       scale_value=self.scale,
-                                       num_heads=self.num_heads,
-                                       num_kv_heads=self.num_kv_heads,
-                                       out=output)
-        assert output is not None
-        return output[:num_tokens, :, :]
 
     def _forward_prefill_no_cache(
         self,
@@ -653,11 +631,7 @@ class AscendAttentionBackendImpl(AttentionImpl):
                     slot_indices=slots)
 
             # V0-Style scheduler situation.
-            if attn_metadata.attn_state == AscendAttentionState.EncoderOnly:
-                output = self._forward_encoder(query, key, value,
-                                               attn_metadata, output,
-                                               num_tokens)
-            elif attn_metadata.attn_state == AscendAttentionState.PrefillNoCache:
+            if attn_metadata.attn_state == AscendAttentionState.PrefillNoCache:
                 output = self._forward_prefill_no_cache(
                     query, key, value, attn_metadata, output, num_tokens)
             elif attn_metadata.attn_state == \

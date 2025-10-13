@@ -888,11 +888,6 @@ class NPUModelRunner(LoRAModelRunnerMixin):
         elif attn_state == AscendAttentionState.PrefillCacheHit:
             return self.attn_mask_builder.get_attn_mask(
                 128, self.dtype, self.device)
-        # Pooling Model
-        elif attn_state == AscendAttentionState.EncoderOnly:
-            max_seq_len = max(seq_lens.max().item(), 0)
-            return self.attn_mask_builder.get_attn_mask(
-                max_seq_len, self.dtype, self.device)
         # Decode-only situation.
         else:
             return None
@@ -1571,7 +1566,7 @@ class NPUModelRunner(LoRAModelRunnerMixin):
             if isinstance(
                     self.kv_cache_config.kv_cache_groups[0].kv_cache_spec,
                     EncoderOnlyAttentionSpec):
-                attn_state = AscendAttentionState.EncoderOnly
+                attn_state = AscendAttentionState.PrefillNoCache
             else:
                 attn_state = AscendAttentionState.PrefillCacheHit
         elif np.array_equal(self.seq_lens_np[:num_reqs], num_scheduled_tokens):
