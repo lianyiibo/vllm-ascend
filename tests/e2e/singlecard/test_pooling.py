@@ -18,10 +18,10 @@
 #
 import os
 
-from transformers import AutoModelForSequenceClassification
 import pytest
 import torch
 from modelscope import snapshot_download  # type: ignore[import-untyped]
+from transformers import AutoModelForSequenceClassification
 
 from tests.e2e.conftest import HfRunner, VllmRunner
 from tests.e2e.utils import check_embeddings_close
@@ -35,6 +35,7 @@ EMBED_MODELS = [
 ]
 CLASSIFY_MODELS = ["Howeee/Qwen2.5-1.5B-apeach"]
 SCORE_MODELS = ["BAAI/bge-reranker-v2-m3"]
+
 
 @pytest.mark.parametrize("model", EMBED_MODELS)
 def test_embed_correctness(model: str) -> None:
@@ -64,6 +65,7 @@ def test_embed_correctness(model: str) -> None:
         tol=1e-2,
     )
 
+
 @pytest.mark.parametrize("model", CLASSIFY_MODELS)
 def test_classify_correctness(model: str) -> None:
 
@@ -82,17 +84,16 @@ def test_classify_correctness(model: str) -> None:
     ) as vllm_runner:
         vllm_outputs = vllm_runner.classify(prompts)
 
-    with HfRunner(
-            model_name,
-            dtype="float32",
-            auto_cls=AutoModelForSequenceClassification
-    ) as hf_runner:
+    with HfRunner(model_name,
+                  dtype="float32",
+                  auto_cls=AutoModelForSequenceClassification) as hf_runner:
         hf_outputs = hf_runner.classify(prompts)
 
     for hf_output, vllm_output in zip(hf_outputs, vllm_outputs):
         hf_output = torch.tensor(hf_output)
         vllm_output = torch.tensor(vllm_output)
         assert torch.allclose(hf_output, vllm_output, 1e-2)
+
 
 @pytest.mark.parametrize("model", SCORE_MODELS)
 def test_score_correctness(model: str) -> None:
@@ -116,7 +117,8 @@ def test_score_correctness(model: str) -> None:
     ) as vllm_runner:
         vllm_outputs = vllm_runner.score(question, options)
 
-    with HfRunner(model_name, dtype="half", is_cross_encoder=True) as hf_runner:
+    with HfRunner(model_name, dtype="half",
+                  is_cross_encoder=True) as hf_runner:
         hf_outputs = hf_runner.predict(text_pairs).tolist()
 
     assert len(vllm_outputs) == 2

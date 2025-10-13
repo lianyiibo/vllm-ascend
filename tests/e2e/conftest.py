@@ -39,7 +39,8 @@ from transformers import (AutoConfig, AutoModelForCausalLM, AutoTokenizer,
                           BatchEncoding, BatchFeature)
 from transformers.models.auto.auto_factory import _BaseAutoModelClass
 from vllm import LLM, SamplingParams
-from vllm.config.model import _get_and_verify_dtype, RunnerOption, ConvertOption
+from vllm.config.model import (ConvertOption, RunnerOption,
+                               _get_and_verify_dtype)
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.entrypoints.cli.serve import ServeSubcommand
 from vllm.inputs import TextPrompt
@@ -272,7 +273,7 @@ class VllmRunner:
         convert: ConvertOption = "auto",
         tokenizer_name: Optional[str] = None,
         tokenizer_mode: str = "auto",
-        max_model_len: int = 1024,
+        max_model_len: Optional[int] = 1024,
         dtype: str = "auto",
         disable_log_stats: bool = True,
         tensor_parallel_size: int = 1,
@@ -465,15 +466,13 @@ class VllmRunner:
         req_outputs = self.llm.classify(prompts)
         return [req_output.outputs.probs for req_output in req_outputs]
 
-    def embed(
-        self,
-        prompts: list[str],
-        images: Optional[PromptImageInput] = None,
-        videos: Optional[PromptVideoInput] = None,
-        audios: Optional[PromptAudioInput] = None,
-        *args,
-        **kwargs
-    ) -> list[list[float]]:
+    def embed(self,
+              prompts: list[str],
+              images: Optional[PromptImageInput] = None,
+              videos: Optional[PromptVideoInput] = None,
+              audios: Optional[PromptAudioInput] = None,
+              *args,
+              **kwargs) -> list[list[float]]:
         inputs = self.get_inputs(prompts,
                                  images=images,
                                  videos=videos,

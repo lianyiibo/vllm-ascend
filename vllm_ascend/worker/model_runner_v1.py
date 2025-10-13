@@ -1568,8 +1568,9 @@ class NPUModelRunner(LoRAModelRunnerMixin):
                           num_valid_tokens):
         ascend_config = get_ascend_config()
         if self.model_config.runner_type == "pooling":
-            if isinstance(self.kv_cache_config.kv_cache_groups[0].kv_cache_spec,
-                          EncoderOnlyAttentionSpec):
+            if isinstance(
+                    self.kv_cache_config.kv_cache_groups[0].kv_cache_spec,
+                    EncoderOnlyAttentionSpec):
                 attn_state = AscendAttentionState.EncoderOnly
             else:
                 attn_state = AscendAttentionState.PrefillCacheHit
@@ -2695,7 +2696,6 @@ class NPUModelRunner(LoRAModelRunnerMixin):
         self.may_reinitialize_input_batch(kv_cache_config)
         self.may_add_encoder_only_layers_to_kv_cache_config()
         self.initialize_attn_backend(kv_cache_config)
-
 
         if self.ascend_config.is_deepseek_sfa:
             kv_caches = self.initialize_kv_cache_tensors_deepseek_sfa(
