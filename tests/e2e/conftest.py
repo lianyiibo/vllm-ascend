@@ -284,7 +284,7 @@ class VllmRunner:
         quantization: Optional[str] = None,
         **kwargs,
     ) -> None:
-        self.llm = LLM(
+        self.model = LLM(
             model=model_name,
             runner=runner,
             convert=convert,
@@ -355,9 +355,9 @@ class VllmRunner:
                                  videos=videos,
                                  audios=audios)
 
-        req_outputs = self.llm.generate(inputs,
-                                        sampling_params=sampling_params,
-                                        **kwargs)
+        req_outputs = self.model.generate(inputs,
+                                          sampling_params=sampling_params,
+                                          **kwargs)
 
         outputs: list[tuple[list[list[int]], list[str]]] = []
         for req_output in req_outputs:
@@ -403,9 +403,9 @@ class VllmRunner:
                                  videos=videos,
                                  audios=audios)
 
-        req_outputs = self.llm.generate(inputs,
-                                        sampling_params=sampling_params,
-                                        **kwargs)
+        req_outputs = self.model.generate(inputs,
+                                          sampling_params=sampling_params,
+                                          **kwargs)
 
         toks_str_logsprobs_prompt_logprobs = (
             self._final_steps_generate_w_logprobs(req_outputs))
@@ -463,7 +463,7 @@ class VllmRunner:
                                         **kwargs)
 
     def classify(self, prompts: list[str]) -> list[list[float]]:
-        req_outputs = self.llm.classify(prompts)
+        req_outputs = self.model.classify(prompts)
         return [req_output.outputs.probs for req_output in req_outputs]
 
     def embed(self,
@@ -478,15 +478,15 @@ class VllmRunner:
                                  videos=videos,
                                  audios=audios)
 
-        req_outputs = self.llm.embed(inputs, *args, **kwargs)
+        req_outputs = self.model.embed(inputs, *args, **kwargs)
         return [req_output.outputs.embedding for req_output in req_outputs]
 
     def encode(self, prompts: list[str]) -> list[list[float]]:
-        req_outputs = self.llm.encode(prompts)
+        req_outputs = self.model.encode(prompts)
         return [req_output.outputs.data for req_output in req_outputs]
 
     def reward(self, prompts: list[str]) -> list[list[float]]:
-        req_outputs = self.llm.reward(prompts)
+        req_outputs = self.model.reward(prompts)
         return [req_output.outputs.data for req_output in req_outputs]
 
     def score(
@@ -496,14 +496,14 @@ class VllmRunner:
         *args,
         **kwargs,
     ) -> list[float]:
-        req_outputs = self.llm.score(text_1, text_2, *args, **kwargs)
+        req_outputs = self.model.score(text_1, text_2, *args, **kwargs)
         return [req_output.outputs.score for req_output in req_outputs]
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        del self.llm
+        del self.model
         clear_ascend_config()
         cleanup_dist_env_and_memory()
 

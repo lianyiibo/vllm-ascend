@@ -16,8 +16,6 @@
 # This file is a part of the vllm-ascend project.
 # Adapted from vllm/tests/basic_correctness/test_basic_correctness.py
 #
-import os
-
 import pytest
 import torch
 from modelscope import snapshot_download  # type: ignore[import-untyped]
@@ -25,8 +23,6 @@ from transformers import AutoModelForSequenceClassification
 
 from tests.e2e.conftest import HfRunner, VllmRunner
 from tests.e2e.utils import check_embeddings_close
-
-os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 
 EMBED_MODELS = [
     "Qwen/Qwen3-Embedding-0.6B",  # lasttoken
