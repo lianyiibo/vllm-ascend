@@ -2651,7 +2651,6 @@ class NPUModelRunner(LoRAModelRunnerMixin):
         Add encoder-only layers to the KV cache config.
         """
         block_size = self.vllm_config.cache_config.block_size
-        use_mla = self.vllm_config.model_config.use_mla
         encoder_only_attn_specs: dict[AttentionSpec,
                                       list[str]] = defaultdict(list)
         attn_layers = get_layers_from_vllm_config(self.vllm_config, Attention)
@@ -2661,8 +2660,7 @@ class NPUModelRunner(LoRAModelRunnerMixin):
                     block_size=block_size,
                     num_kv_heads=attn_module.num_kv_heads,
                     head_size=attn_module.head_size,
-                    dtype=self.kv_cache_dtype,
-                    use_mla=use_mla)
+                    dtype=self.kv_cache_dtype)
                 encoder_only_attn_specs[attn_spec].append(layer_name)
                 self.runner_only_attn_layers.add(layer_name)
         if len(encoder_only_attn_specs) > 0:

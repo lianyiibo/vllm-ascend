@@ -42,7 +42,8 @@ def test_embed_correctness(model: str) -> None:
             model_name,
             runner="pooling",
             enforce_eager=True,
-            max_model_len=512,
+            max_model_len=None,
+            enable_chunked_prefill=None,
     ) as vllm_runner:
         vllm_outputs = vllm_runner.embed(queries)
 
@@ -76,7 +77,8 @@ def test_classify_correctness(model: str) -> None:
             model_name,
             runner="pooling",
             enforce_eager=True,
-            max_model_len=512,
+            max_model_len=None,
+            enable_chunked_prefill=None,
     ) as vllm_runner:
         vllm_outputs = vllm_runner.classify(prompts)
 
@@ -110,6 +112,7 @@ def test_score_correctness(model: str) -> None:
             runner="pooling",
             enforce_eager=True,
             max_model_len=None,
+            enable_chunked_prefill=None,
     ) as vllm_runner:
         vllm_outputs = vllm_runner.score(question, options)
 
